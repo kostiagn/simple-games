@@ -1,0 +1,97 @@
+<html>
+
+<head>
+    <style>
+        .cell {
+            display: inline-block;
+            border: 1px solid #b0b0b0;
+            background: #eee;
+            width: 20px;
+            height: 20px;
+            margin: 1;
+        }
+
+        .cell.full {
+            background-color: #080;
+        }
+
+        .cell.fig {
+            background-color: #088;
+        }
+
+        .cell.fig.center {
+            background-color: #aa0;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="display: flex; justify-content: center;">
+        <div id="board">
+        </div>
+        <br />
+        <button id="add-figure"> add</button>
+    </div>
+
+    <script>
+        const boardWidth = 4;
+        const boardHeight = 4;
+        const boardEl = document.querySelector('#board');
+        const board = [];
+        let fx = 1;
+        let fy = 1;
+        const figures = [];
+
+
+        createBoard();
+        setClass(fx, fy, 'fig center');
+
+        boardEl.addEventListener('mouseup', e => {
+            if (e.target === boardEl) return;
+            console.log(e.target.className)
+            if (e.target.className === 'cell fig center') return;
+            e.target.className = e.target.className === 'cell fig' ? 'cell' : 'cell fig';
+        })
+
+        document.querySelector('#add-figure').addEventListener('click', () => {
+            const f = [[0,0]];
+            for (let y = 0; y < boardHeight; y++) {
+                for (let x = 0; x < boardWidth; x++) {
+                    const cell = document.querySelector(`#cell_${x}_${y}`);
+                    if (cell.className === 'cell fig') {
+                        f.push([x-fx,y-fy]);
+                    }
+                    
+                }
+            }
+            figures.push(f);
+            console.log(JSON.stringify(figures));
+        })
+
+
+        function setClass(x, y, className) {
+            const el = document.querySelector(`#cell_${x}_${y}`);
+            if (el) el.className = 'cell ' + className;
+        }
+
+        function createBoard() {
+
+            let s = '';
+            for (let x = 0; x < boardWidth; x++) {
+                board[x] = [];
+            }
+            for (let y = 0; y < boardHeight; y++) {
+                for (let x = 0; x < boardWidth; x++) {
+                    board[x][y] = 0;
+                    s += `<div id='cell_${x}_${y}' class='cell'></div>`
+                }
+                s += "<br/>"
+            }
+            boardEl.innerHTML = s;
+
+        }
+
+    </script>
+</body>
+
+</html>
