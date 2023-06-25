@@ -1,0 +1,42 @@
+<html>
+
+<head>
+    <style>
+        .cell {
+            display: inline-block;
+            border: 1px solid #b0b0b0;
+            background: #eee;
+            width: 20px;
+            height: 20px;
+            margin: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="display: flex;justify-content: center;">
+        <div id="board">
+        </div>
+    </div>
+
+    <script>
+        const boardWidth = 10;
+        const boardHeight = 20;
+        const boardEl = document.getElementById('board');
+        createBoard();
+
+
+        function createBoard() {
+            let s = '';
+            for (let y = 0; y < boardHeight; y++) {
+                for (let x = 0; x < boardWidth; x++) {
+                    s += `<div class='cell'></div>`
+                }
+                s += "<br/>"
+            }
+            boardEl.innerHTML = s;
+        }
+    </script>
+</body>
+
+</html>
