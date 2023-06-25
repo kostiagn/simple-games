@@ -10,6 +10,10 @@
             height: 20px;
             margin: 1;
         }
+
+        .cell.fig {
+            background-color: #088;
+        }
     </style>
 </head>
 
@@ -20,11 +24,29 @@
     </div>
 
     <script>
-        const boardWidth = 10;
-        const boardHeight = 20;
+        const boardWidth = 6;
+        const boardHeight = 6;
+
+        let fx = 2;
+        let fy = 2;
+
         const boardEl = document.getElementById('board');
         createBoard();
+        setClass(fx, fy, 'fig')
 
+        document.addEventListener('keyup', e => {
+            setClass(fx, fy, '');
+            if (e.code === 'ArrowLeft' && fx > 0) fx--;
+            if (e.code === 'ArrowRight' && fx < boardWidth - 1) fx++;
+            if (e.code === 'ArrowUp' && fy > 0) fy--;
+            if (e.code === 'ArrowDown' && fy < boardHeight - 1) fy++;
+            setClass(fx, fy, 'fig');
+        });
+
+
+        function setClass(x, y, className) {
+            boardEl.querySelectorAll('.cell')[y * boardWidth + x].className = 'cell ' + className;
+        }
 
         function createBoard() {
             let s = '';
