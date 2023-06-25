@@ -22,6 +22,10 @@
         .cell.full {
             background-color: #080;
         }
+
+        .cell.fig.ready-to-freeze {
+            background-color: #464;
+        }
     </style>
 </head>
 
@@ -33,7 +37,7 @@
 
     <script>
         const boardWidth = 10;
-        const boardHeight = 6;
+        const boardHeight = 20;
 
         let fx = 1;
         let fy = 1;
@@ -70,6 +74,7 @@
         ];
         let figNum = 0;
         let figView = 0;
+        let isReadyToFreeze = false;
         let board = [];
 
 
@@ -80,16 +85,14 @@
         paintFig(fx, fy, figNum, figView);
 
         document.addEventListener('keyup', e => {
+            isReadyToFreeze = false;
             eraseFig(fx, fy, figNum, figView);
             if (e.code === 'ArrowLeft' && canMove(fx - 1, fy, figNum, figView)) fx--;
             if (e.code === 'ArrowRight' && canMove(fx + 1, fy, figNum, figView)) fx++;
-            if (e.code === 'ArrowUp' && canMove(fx, fy - 1, figNum, figView)) fy--;
-            if (e.code === 'ArrowDown' && canMove(fx, fy + 1, figNum, figView)) fy++;
-            if (e.code === 'Space' && canMove(fx, fy, figNum, incFigView(figNum, figView))) figView = incFigView(figNum, figView);
-            if (e.code === 'KeyN' && canMove(fx, fy, incFigNum(figNum), 0)) {
-                figNum = incFigNum(figNum);
-                figView = 0;
-            }
+            if (e.code === 'ArrowDown' && canMove(fx, fy, figNum, incFigView(figNum, figView))) figView = incFigView(figNum, figView);
+            if (e.code === 'ArrowUp' && canMove(fx, fy, figNum, decFigView(figNum, figView))) figView = decFigView(figNum, figView);
+            if (e.code === 'Space') fallDown();
+
             paintFig(fx, fy, figNum, figView);
             console.log(e.code, fx, fy, figNum, figView);
         });
@@ -98,6 +101,10 @@
             if (canMove(fx, fy + 1, figNum, figView)) {
                 eraseFig(fx, fy, figNum, figView);
                 fy++;
+                paintFig(fx, fy, figNum, figView);
+            } else if (!isReadyToFreeze) {
+                eraseFig(fx, fy, figNum, figView);
+                isReadyToFreeze = true;
                 paintFig(fx, fy, figNum, figView);
             } else {
                 eraseFig(fx, fy, figNum, figView);
@@ -111,12 +118,21 @@
             }
         }, 500)
 
+        function fallDown() {
+            while (canMove(fx, fy + 1, figNum, figView)) {
+                eraseFig(fx, fy, figNum, figView);
+                fy++;
+                paintFig(fx, fy, figNum, figView);
+            }
+
+        }
 
         function nextFig() {
             fx = Math.floor(boardWidth / 2);
             fy = 0;
             figView = 0;
-            figNum = Math.floor(Math.random() * figures.length)
+            figNum = Math.floor(Math.random() * figures.length);
+            isReadyToFreeze = false;
         }
 
         function gameOver() {
@@ -132,12 +148,16 @@
             return (view + 1) % figures[num].length;
         }
 
+        function decFigView(num, view) {
+            return view === 0 ? figures[num].length - 1 : view - 1;
+        }
+
         function paintFig(x, y, num, view) {
             const fig = figures[num][view];
             for (let i = 0; i < fig.length; i++) {
                 const nx = x + fig[i].x;
                 const ny = y + fig[i].y;
-                setClass(nx, ny, i === 0 ? 'fig center' : 'fig');
+                setClass(nx, ny, i === 0 ? 'fig center' : isReadyToFreeze ? 'fig ready-to-freeze' : 'fig');
             }
         }
 
