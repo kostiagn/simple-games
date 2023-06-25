@@ -18,6 +18,10 @@
         .cell.fig.center {
             background-color: #aa0;
         }
+
+        .cell.full {
+            background-color: #080;
+        }
     </style>
 </head>
 
@@ -28,43 +32,108 @@
     </div>
 
     <script>
-        const boardWidth = 4;
-        const boardHeight = 4;
+        const boardWidth = 10;
+        const boardHeight = 6;
 
         let fx = 1;
         let fy = 1;
 
 
         let figures = [
-            //O#O 
+            //O#O - fig 0
             // O
-            [{ "x": 0, "y": 0 }, { "x": -1, "y": 0 }, { "x": 1, "y": 0 }, { "x": 0, "y": 1 }], [{ "x": 0, "y": 0 }, { "x": 0, "y": -1 }, { "x": -1, "y": 0 }, { "x": 0, "y": 1 }], [{ "x": 0, "y": 0 }, { "x": 0, "y": -1 }, { "x": -1, "y": 0 }, { "x": 1, "y": 0 }], [{ "x": 0, "y": 0 }, { "x": 0, "y": -1 }, { "x": 1, "y": 0 }, { "x": 0, "y": 1 }]
+            [
+                [{ "x": 0, "y": 0 }, { "x": -1, "y": 0 }, { "x": 1, "y": 0 }, { "x": 0, "y": 1 }],
+                [{ "x": 0, "y": 0 }, { "x": 0, "y": -1 }, { "x": -1, "y": 0 }, { "x": 0, "y": 1 }],
+                [{ "x": 0, "y": 0 }, { "x": 0, "y": -1 }, { "x": -1, "y": 0 }, { "x": 1, "y": 0 }],
+                [{ "x": 0, "y": 0 }, { "x": 0, "y": -1 }, { "x": 1, "y": 0 }, { "x": 0, "y": 1 }]
+            ],
+            //#O - fig 1
+            //OO
+            [
+                [{ "x": 0, "y": 0 }, { "x": 1, "y": 0 }, { "x": 0, "y": 1 }, { "x": 1, "y": 1 }],
+            ],
+            //O# -fig 2
+            // OO
+            [[{ "x": 0, "y": 0 }, { "x": -1, "y": 0 }, { "x": 0, "y": 1 }, { "x": 1, "y": 1 }], [{ "x": 0, "y": 0 }, { "x": 0, "y": -1 }, { "x": -1, "y": 0 }, { "x": -1, "y": 1 }]],
+            // #O - fig 3
+            //OO
+            [[{ "x": 0, "y": 0 }, { "x": 1, "y": 0 }, { "x": -1, "y": 1 }, { "x": 0, "y": 1 }], [{ "x": 0, "y": 0 }, { "x": -1, "y": -1 }, { "x": -1, "y": 0 }, { "x": 0, "y": 1 }]],
+            //O#O - fig 4
+            //O
+            [[{ "x": 0, "y": 0 }, { "x": -1, "y": 0 }, { "x": 1, "y": 0 }, { "x": -1, "y": 1 }], [{ "x": 0, "y": 0 }, { "x": -1, "y": -1 }, { "x": 0, "y": -1 }, { "x": 0, "y": 1 }], [{ "x": 0, "y": 0 }, { "x": 1, "y": -1 }, { "x": -1, "y": 0 }, { "x": 1, "y": 0 }], [{ "x": 0, "y": 0 }, { "x": 0, "y": -1 }, { "x": 0, "y": 1 }, { "x": 1, "y": 1 }]],
+            //O#O - fig 5
+            //  O
+            [[{ "x": 0, "y": 0 }, { "x": -1, "y": 0 }, { "x": 1, "y": 0 }, { "x": 1, "y": 1 }], [{ "x": 0, "y": 0 }, { "x": 0, "y": -1 }, { "x": -1, "y": 1 }, { "x": 0, "y": 1 }], [{ "x": 0, "y": 0 }, { "x": -1, "y": -1 }, { "x": -1, "y": 0 }, { "x": 1, "y": 0 }], [{ "x": 0, "y": 0 }, { "x": 0, "y": -1 }, { "x": 1, "y": -1 }, { "x": 0, "y": 1 }]],
+            //O#OO - fig 6
+            [[{ "x": 0, "y": 0 }, { "x": -1, "y": 0 }, { "x": 1, "y": 0 }, { "x": 2, "y": 0 }], [{ "x": 0, "y": 0 }, { "x": 0, "y": -1 }, { "x": 0, "y": 1 }, { "x": 0, "y": 2 }]],
         ];
+        let figNum = 0;
         let figView = 0;
+        let board = [];
 
 
         const boardEl = document.getElementById('board');
         createBoard();
+        nextFig();
 
-        paintFig(fx, fy, figView);
+        paintFig(fx, fy, figNum, figView);
 
         document.addEventListener('keyup', e => {
-            eraseFig(fx, fy, figView);
-            if (e.code === 'ArrowLeft' && canMove(fx - 1, fy, figView)) fx--;
-            if (e.code === 'ArrowRight' && canMove(fx + 1, fy, figView)) fx++;
-            if (e.code === 'ArrowUp' && canMove(fx, fy - 1, figView)) fy--;
-            if (e.code === 'ArrowDown' && canMove(fx, fy + 1, figView)) fy++;
-            if (e.code === 'Space' && canMove(fx, fy, incFigView(figView))) figView = incFigView(figView);
-            paintFig(fx, fy, figView);
-            console.log(e.code, fx, fy, figView);
+            eraseFig(fx, fy, figNum, figView);
+            if (e.code === 'ArrowLeft' && canMove(fx - 1, fy, figNum, figView)) fx--;
+            if (e.code === 'ArrowRight' && canMove(fx + 1, fy, figNum, figView)) fx++;
+            if (e.code === 'ArrowUp' && canMove(fx, fy - 1, figNum, figView)) fy--;
+            if (e.code === 'ArrowDown' && canMove(fx, fy + 1, figNum, figView)) fy++;
+            if (e.code === 'Space' && canMove(fx, fy, figNum, incFigView(figNum, figView))) figView = incFigView(figNum, figView);
+            if (e.code === 'KeyN' && canMove(fx, fy, incFigNum(figNum), 0)) {
+                figNum = incFigNum(figNum);
+                figView = 0;
+            }
+            paintFig(fx, fy, figNum, figView);
+            console.log(e.code, fx, fy, figNum, figView);
         });
 
+        let timer = setInterval(() => {
+            if (canMove(fx, fy + 1, figNum, figView)) {
+                eraseFig(fx, fy, figNum, figView);
+                fy++;
+                paintFig(fx, fy, figNum, figView);
+            } else {
+                eraseFig(fx, fy, figNum, figView);
+                freezeFig(fx, fy, figNum, figView);
+                nextFig();
+                if (!canMove(fx, fy, figNum, figView)) {
+                    gameOver();
+                } else {
+                    paintFig(fx, fy, figNum, figView);
+                }
+            }
+        }, 500)
 
-        function incFigView(view) {
-            return (view + 1) % 4;
+
+        function nextFig() {
+            fx = Math.floor(boardWidth / 2);
+            fy = 0;
+            figView = 0;
+            figNum = Math.floor(Math.random() * figures.length)
         }
-        function paintFig(x, y, view) {
-            const fig = figures[view];
+
+        function gameOver() {
+            clearInterval(timer);
+            boardEl.innerHTML = 'GAME OVER';
+        }
+
+        function incFigNum(num) {
+            return (num + 1) % figures.length;
+        }
+
+        function incFigView(num, view) {
+            return (view + 1) % figures[num].length;
+        }
+
+        function paintFig(x, y, num, view) {
+            const fig = figures[num][view];
             for (let i = 0; i < fig.length; i++) {
                 const nx = x + fig[i].x;
                 const ny = y + fig[i].y;
@@ -72,8 +141,8 @@
             }
         }
 
-        function eraseFig(x, y, view) {
-            const fig = figures[view];
+        function eraseFig(x, y, num, view) {
+            const fig = figures[num][view];
             for (let i = 0; i < fig.length; i++) {
                 const nx = x + fig[i].x;
                 const ny = y + fig[i].y;
@@ -81,15 +150,26 @@
             }
         }
 
-        function canMove(x, y, view) {
-            const fig = figures[view];
+        function freezeFig(x, y, num, view) {
+            const fig = figures[num][view];
             for (let i = 0; i < fig.length; i++) {
                 const nx = x + fig[i].x;
                 const ny = y + fig[i].y;
-                if (nx < 0 || nx >= boardWidth)
-                    return false;
-                if (ny < 0 || ny >= boardHeight)
-                    return false;
+                board[ny][nx] = 1;
+                setClass(nx, ny, 'full');
+            }
+        }
+
+
+        function canMove(x, y, num, view) {
+            const fig = figures[num][view];
+
+            for (let i = 0; i < fig.length; i++) {
+                const nx = x + fig[i].x;
+                const ny = y + fig[i].y;
+                if (nx < 0 || nx >= boardWidth) return false;
+                if (ny < 0 || ny >= boardHeight) return false;
+                if (board[ny][nx] !== 0) return false;
             }
             return true;
         }
@@ -100,8 +180,11 @@
 
         function createBoard() {
             let s = '';
+            board = [];
             for (let y = 0; y < boardHeight; y++) {
+                board[y] = [];
                 for (let x = 0; x < boardWidth; x++) {
+                    board[y][x] = 0;
                     s += `<div class='cell'></div>`
                 }
                 s += "<br/>"
