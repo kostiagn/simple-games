@@ -14,6 +14,7 @@
         .cell.fig {
             background-color: #088;
         }
+
         .cell.fig.center {
             background-color: #aa0;
         }
@@ -33,44 +34,69 @@
         let fx = 1;
         let fy = 1;
 
+
+        let figures = [
+            //O#O 
+            // O
+            [{ x: 0, y: 0 }, { x: -1, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }],
+            [{ x: 0, y: 0 }, { x: 0, y: -1 }, { x: -1, y: 0 }, { x: 0, y: 1 }],
+            [{ x: 0, y: 0 }, { x: 0, y: -1 }, { x: -1, y: 0 }, { x: 1, y: 0 }],
+            [{ x: 0, y: 0 }, { x: 0, y: -1 }, { x: 1, y: 0 }, { x: 0, y: 1 }]
+        ];
+        let figView = 0;
+
+
         const boardEl = document.getElementById('board');
         createBoard();
-        paintFig(fx, fy);
+
+        paintFig(fx, fy, figView);
 
         document.addEventListener('keyup', e => {
-            
-            eraseFig(fx, fy);
-            if (e.code === 'ArrowLeft' && canMove(fx-1, fy)) fx--;
-            if (e.code === 'ArrowRight' && canMove(fx+1, fy)) fx++;
-            if (e.code === 'ArrowUp' && canMove(fx, fy-1)) fy--;
-            if (e.code === 'ArrowDown' && canMove(fx-1, fy+1)) fy++;
-            paintFig(fx, fy);
-            console.log(e.code, fx, fy);
+            eraseFig(fx, fy, figView);
+            if (e.code === 'ArrowLeft' && canMove(fx - 1, fy, figView)) fx--;
+            if (e.code === 'ArrowRight' && canMove(fx + 1, fy, figView)) fx++;
+            if (e.code === 'ArrowUp' && canMove(fx, fy - 1, figView)) fy--;
+            if (e.code === 'ArrowDown' && canMove(fx, fy + 1, figView)) fy++;
+            if (e.code === 'Space' && canMove(fx, fy, incFigView(figView))) figView = incFigView(figView);
+            paintFig(fx, fy, figView);
+            console.log(e.code, fx, fy, figView);
         });
 
 
-        function paintFig(x, y) {
-            //OOO
-            // O
-            setClass(x, y, 'fig center');
-            setClass(x-1, y, 'fig');
-            setClass(x+1, y, 'fig');
-            setClass(x, y+1, 'fig');
+        function incFigView(view) {
+            return (view + 1) % 4;
+        }
+        function paintFig(x, y, view) {
+            const fig = figures[view];
+            for (let i = 0; i < fig.length; i++) {
+                const nx = x + fig[i].x;
+                const ny = y + fig[i].y;
+                setClass(nx, ny, i === 0 ? 'fig center' : 'fig');
+            }
         }
 
-        function eraseFig(x, y) {
-            setClass(x, y, '');
-            setClass(x-1, y, '');
-            setClass(x+1, y, '');
-            setClass(x, y+1, '');
+        function eraseFig(x, y, view) {
+            const fig = figures[view];
+            for (let i = 0; i < fig.length; i++) {
+                const nx = x + fig[i].x;
+                const ny = y + fig[i].y;
+                setClass(nx, ny, '');
+            }
         }
 
-        function canMove(x, y) {
-            if (x < 1 || x >= boardWidth-1) return false; 
-            if (y < 0 || y >= boardHeight-1) return false; 
-
+        function canMove(x, y, view) {
+            const fig = figures[view];
+            for (let i = 0; i < fig.length; i++) {
+                const nx = x + fig[i].x;
+                const ny = y + fig[i].y;
+                if (nx < 0 || nx >= boardWidth)
+                    return false;
+                if (ny < 0 || ny >= boardHeight)
+                    return false;
+            }
             return true;
         }
+
         function setClass(x, y, className) {
             boardEl.querySelectorAll('.cell')[y * boardWidth + x].className = 'cell ' + className;
         }
